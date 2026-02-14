@@ -1,6 +1,4 @@
-FROM openjdk:17-jdk-slim
-
-LABEL maintainer="your-email@example.com"
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
