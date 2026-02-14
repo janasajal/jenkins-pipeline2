@@ -580,7 +580,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Your Name** - [janasajal](https://github.com/janasajal)
+**Your Name** - [Sajal Jana](https://github.com/janasajal)
 
 **Project Link:** [https://github.com/janasajal/jenkins-pipeline2](https://github.com/janasajal/jenkins-pipeline2)
 
