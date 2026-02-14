@@ -7,7 +7,7 @@ pipeline {
     }
     
     environment {
-        DOCKER_IMAGE = "your-dockerhub-username/spring-boot-app"
+        DOCKER_IMAGE = "janasajal/spring-boot-app"
         DOCKER_TAG = "${BUILD_NUMBER}"
         SONAR_PROJECT_KEY = "spring-boot-app"
     }
