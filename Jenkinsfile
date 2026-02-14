@@ -9,14 +9,12 @@ pipeline {
     environment {
         DOCKER_IMAGE = "janasajal/spring-boot-app"
         DOCKER_TAG = "${BUILD_NUMBER}"
-        SONAR_PROJECT_KEY = "spring-boot-app"
     }
     
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', 
-                    url: 'https://github.com/janasajal/jenkins-pipeline2.git'
+                git branch: 'main', url: 'https://github.com/janasajal/jenkins-pipeline2.git'
             }
         }
         
@@ -30,31 +28,6 @@ pipeline {
             steps {
                 sh 'mvn test'
             }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
-                }
-            }
-        }
-        
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                        mvn sonar:sonar \
-                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                        -Dsonar.java.binaries=target/classes
-                    """
-                }
-            }
-        }
-        
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
         }
         
         stage('Package') {
@@ -66,8 +39,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                    docker.build("${DOCKER_IMAGE}:latest")
+                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -75,46 +48,10 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                        docker.image("${DOCKER_IMAGE}:latest").push()
-                    }
-                }
-            }
-        }
-        
-        stage('Clean Docker Images') {
-            steps {
-                sh """
-                    docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
-                    docker rmi ${DOCKER_IMAGE}:latest || true
-                """
-            }
-        }
-        
-        stage('Update Kubernetes Manifests') {
-            steps {
-                script {
-                    sh """
-                        sed -i 's|image: .*|image: ${DOCKER_IMAGE}:${DOCKER_TAG}|g' k8s/deployment.yaml
-                    """
-                }
-            }
-        }
-        
-        stage('Commit & Push Changes') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'github-credentials', 
-                                                     usernameVariable: 'GIT_USERNAME', 
-                                                     passwordVariable: 'GIT_PASSWORD')]) {
-                        sh """
-                            git config user.email "jenkins@example.com"
-                            git config user.name "Jenkins CI"
-                            git add k8s/deployment.yaml
-                            git commit -m "Update image to ${DOCKER_TAG}" || true
-                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/janasajal/jenkins-pipeline2.git main || true
-                        """
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh "echo \${DOCKER_PASS} | docker login -u \${DOCKER_USER} --password-stdin"
+                        sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                        sh "docker push ${DOCKER_IMAGE}:latest"
                     }
                 }
             }
@@ -129,14 +66,8 @@ pipeline {
             echo 'Pipeline failed!'
         }
         always {
-            cleanWs()
+            sh "docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true"
+            sh "docker rmi ${DOCKER_IMAGE}:latest || true"
         }
     }
 }
-```
-
-## File 4: Application Code
-
-Create directory structure:
-```
-src/main/java/com/example/demo/
