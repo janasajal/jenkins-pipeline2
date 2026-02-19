@@ -29,6 +29,8 @@ A production-ready CI/CD pipeline demonstrating DevOps best practices with autom
 - [Contact](#contact)
 
 ---
+<img width="1526" height="660" alt="image" src="https://github.com/user-attachments/assets/5f3fbf76-0038-4123-91bf-63b2f6e1fe0a" />
+
 
 ## 🎯 Overview
 
