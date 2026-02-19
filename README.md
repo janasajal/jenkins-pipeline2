@@ -7,7 +7,7 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.1.5-green?logo=springboot)](https://spring.io/projects/spring-boot)
 
 A production-ready CI/CD pipeline demonstrating DevOps best practices with automated build, test, containerization, and deployment to Kubernetes using GitOps principles.
-**Author:** Sajal Jana
+# **Author:** Sajal Jana
 
 ---
 
